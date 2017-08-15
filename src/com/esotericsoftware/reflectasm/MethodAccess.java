@@ -14,22 +14,19 @@
 
 package com.esotericsoftware.reflectasm;
 
-import static com.esotericsoftware.asm.Opcodes.*;
+import com.esotericsoftware.asm.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.esotericsoftware.asm.ClassWriter;
-import com.esotericsoftware.asm.Label;
-import com.esotericsoftware.asm.MethodVisitor;
-import com.esotericsoftware.asm.Opcodes;
-import com.esotericsoftware.asm.Type;
+import static com.esotericsoftware.asm.Opcodes.*;
 
 public abstract class MethodAccess {
 	private String[] methodNames;
 	private Class[][] parameterTypes;
+	private java.lang.reflect.Type[][] genericTypes;
 	private Class[] returnTypes;
 
 	abstract public Object invoke (Object object, int methodIndex, Object... args);
@@ -73,6 +70,10 @@ public abstract class MethodAccess {
 		return parameterTypes;
 	}
 
+	public java.lang.reflect.Type[][] getGenericTypes() {
+		return genericTypes;
+	}
+
 	public Class[] getReturnTypes () {
 		return returnTypes;
 	}
@@ -93,11 +94,13 @@ public abstract class MethodAccess {
 		int n = methods.size();
 		String[] methodNames = new String[n];
 		Class[][] parameterTypes = new Class[n][];
+		java.lang.reflect.Type[][] genericTypes = new java.lang.reflect.Type[n][];
 		Class[] returnTypes = new Class[n];
 		for (int i = 0; i < n; i++) {
 			Method method = methods.get(i);
 			methodNames[i] = method.getName();
 			parameterTypes[i] = method.getParameterTypes();
+			genericTypes[i] = method.getGenericParameterTypes();
 			returnTypes[i] = method.getReturnType();
 		}
 
@@ -280,6 +283,7 @@ public abstract class MethodAccess {
 			MethodAccess access = (MethodAccess)accessClass.newInstance();
 			access.methodNames = methodNames;
 			access.parameterTypes = parameterTypes;
+			access.genericTypes = genericTypes;
 			access.returnTypes = returnTypes;
 			return access;
 		} catch (Throwable t) {
